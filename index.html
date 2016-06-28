@@ -370,7 +370,7 @@
             if (count==target)
 			{
 				alert("yay");
-				game.input.mouse.enabled = false;
+				rocks.forEach(function(object){object.input.draggable = false;});
 				return [true, ""];
 			}
 			else 
