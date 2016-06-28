@@ -121,6 +121,7 @@
                 object.anchor.setTo(0.5,0.5);
                 object.frame=0;
                 object.scale.setTo(0.25*sx);
+                object.originalPosition = object.position.clone();
                 object.inputEnabled=true;
                 object.input.enableDrag(false,false,false,255,bounds,null);
                 object.events.onDragStart.add(onDragStart,this);
@@ -170,6 +171,12 @@
 
         function onDragStart(sprite,pointer){
             sprite.frame=1;
+            
+
+        }
+
+        function onDragStop(sprite,pointer){
+            sprite.frame=0;
             objects.forEach(function(object){ 
            		if (! (isInside(object,box1) || isInside(object,box2)) )
            		{
@@ -177,11 +184,6 @@
            		}
            		
            });
-
-        }
-
-        function onDragStop(sprite,pointer){
-            sprite.frame=0;
         }
 
         function render(){

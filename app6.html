@@ -109,6 +109,7 @@
                 object.anchor.setTo(0.5,0.5);
                 object.scale.setTo(0.30*sx);
                 object.frame=0;
+                object.originalPosition = object.position.clone();
                 object.inputEnabled=true;
                 object.input.enableDrag(false,false,false,255,bounds,null);
                 object.events.onDragStart.add(onDragStart,this);
@@ -148,6 +149,12 @@
                 sprite.y = 150*sy+Math.floor((num-1)/4)*230*sy;
                 attempts++;
             }
+             else if (!isInside(sprite)){
+            	objects.forEach(function(object){
+            		object.position.copyFrom(object.originalPosition);
+            	});
+            }
+            	
             if (currentCount==target){
                 alert('Yayy!');
                 stat = true;
