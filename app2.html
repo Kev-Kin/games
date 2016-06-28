@@ -24,12 +24,17 @@
         var gameHeight = 1080;
         var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create});
         var objects;
-        var box;
+        var boxGroupL;
+        var boxGroupR;
         var count1=0,count2=0;
         var target,attempts=1,stat=false;
         var sx = window.innerWidth/gameWidth;
         var sy = window.innerHeight/gameHeight;
-
+	var box1CoordX = new Array();
+	var box1CoordY = new Array();
+	var box2CoordX = new Array();
+	var box2CoordY = new Array();
+	
         var ros = new ROSLIB.Ros({
             url : 'ws://localhost:9090'
         });
@@ -100,6 +105,8 @@
             box1.y = game.height/2-box1.height/2;
             box1.inputEnabled=true;
             box1.frame = 0;
+            
+            
 
             box2 = game.add.sprite(0,0,'yana');
             box2.scale.setTo(0.7*sx);
@@ -108,13 +115,28 @@
             box2.inputEnabled=true;
             box2.frame = 0;
 
-            objects=game.add.group();
+            objects = game.add.group();
+            boxGroupL = game.add.group();
+            boxGroupR = game.add.group();
+            
+            boxCoordinates(box1CoordX,box1CoordY, box1);
+            boxCoordinates(box2CoordX,box2CoordY, box2);
+            
             for (var i=1;i<=target;i++){
                 var name = "object"+(i%4+1);
                 console.log("Object number "+i+" object name "+name);
-                objects.create(game.world.centerX+Math.pow(-1,i%2)*75,0.1*game.height+Math.floor((i-1)/2)*100,name);
+                objects.create(  
+                
+                //box1.x+100*sx+(i%3)*150*sx, box1.y+ 175 *sy + Math.floor(i/3)*150*sy , name);
+                
+                game.world.centerX+Math.pow(-1,i%2)*75,0.1*game.height+Math.floor((i-1)/2)*100,name);
+                
+		
             }
+            
 
+            
+		
             var bounds = new Phaser.Rectangle(0,0,logo.width,logo.height);
 
             objects.forEach(function(object){
@@ -182,6 +204,24 @@
            		{
            			object.position.copyFrom(object.originalPosition); 
            		}
+           		else if ( isInside(object,box1) && boxGroupL.addChild(object) )
+           		{	
+           			for (var i = 0; i < boxGroupL.total; i++)
+				{
+					boxGroupL.getChildAt(i).x = box1CoordX[i];
+					boxGroupL.getChildAt(i).y = box1CoordY[i];
+				}
+           		}
+           		else if ( isInside(object,box2) && boxGroupR.addChild(object))
+           		{
+           			for (var i = 0; i < boxGroupR.total; i++)
+				{
+					boxGroupR.getChildAt(i).x = box2CoordX[i];
+					boxGroupR.getChildAt(i).y = box2CoordY[i];
+				}
+			}
+           		else { console.log("error");
+           		}
            		
            });
         }
@@ -216,12 +256,24 @@
              }
             else return false;
         }
+        
+        function boxCoordinates(boxArrayX,boxArrayY, box){
+        	for (var i =0; i< target; i++){
+        		
+        		boxArrayX[i] = box.x+100*sx+(i%3)*150*sx;
+        		boxArrayY[i] = box.y+ 175 *sy + Math.floor(i/3)*150*sy;
+        	}
+        }
+        
+        
 
         function reset(){
 
         }
 
     };
+
+
 
     </script>
 
