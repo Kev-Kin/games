@@ -22,7 +22,7 @@
     window.onload = function() {
         var gameWidth = 1920;
         var gameHeight = 1080;
-        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create});
+        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create, render: render});
         var objects;
         var boxGroupL;
         var boxGroupR;
@@ -90,6 +90,7 @@
             target = game.math.snapToCeil(game.rnd.integerInRange(1,10),2,0);
             //target = game.math.snapToCeil(10,2,0);
             
+			
             button = game.add.sprite(0,0,'button');
             button.scale.setTo(0.4*sx);
             button.x = game.world.centerX-button.width/2;
@@ -199,31 +200,51 @@
 
         function onDragStop(sprite,pointer){
             sprite.frame=0;
-            objects.forEach(function(object){ 
-           		if (! (isInside(object,box1) || isInside(object,box2)) )
-           		{
-           			object.position.copyFrom(object.originalPosition); 
-           		}
-           		else if ( isInside(object,box1) && boxGroupL.addChild(object) )
+
+           		if ( isInside(sprite,box1)  )
            		{	
+					 boxGroupL.addChild(sprite);
+					 objects.removeChild(sprite);
+					 console.log("boxGroupL.total 1 =" + boxGroupL.total);
+					 console.log("boxGroupR.tota l =" + boxGroupR.total);
+					 console.log("objects.total 1 =" + objects.total);
+					 
+           		}
+           		else if ( isInside(sprite,box2)  )
+           		{
+					boxGroupR.addChild(sprite);
+					objects.removeChild(sprite);
+					
+					console.log("boxGroupL.total 2 =" + boxGroupL.total);
+					console.log("boxGroupR.total 2 =" + boxGroupR.total);
+					console.log("objects.total 2 =" + objects.total);
+				}
+			
+           		else if (! (isInside(sprite,box1) || isInside(sprite,box2)) )
+           		{
+					if(objects.countLiving()!== target)
+					{
+						objects.addChild(sprite);
+					}
+					
+           			sprite.position.copyFrom(sprite.originalPosition); 
+					
+					console.log("boxGroupL.total 3 =" + boxGroupL.total);
+					console.log("boxGroupR.total 3 ="  + boxGroupR.total);
+					console.log("objects.total 3 =" + objects.total);
+           		
+           		}
+           		
            			for (var i = 0; i < boxGroupL.total; i++)
 				{
 					boxGroupL.getChildAt(i).x = box1CoordX[i];
 					boxGroupL.getChildAt(i).y = box1CoordY[i];
 				}
-           		}
-           		else if ( isInside(object,box2) && boxGroupR.addChild(object))
-           		{
            			for (var i = 0; i < boxGroupR.total; i++)
 				{
 					boxGroupR.getChildAt(i).x = box2CoordX[i];
 					boxGroupR.getChildAt(i).y = box2CoordY[i];
 				}
-			}
-           		else { console.log("error");
-           		}
-           		
-           });
         }
 
         function render(){
@@ -236,8 +257,9 @@
         }
 
         function countStars(){
-            count1 = 0;
-            count2 = 0;
+            count1 = boxGroupL.total;
+            count2 = boxGroupR.total;
+			/*
             objects.forEach(function(object){
                 if (isInside(object,box1)){
                     console.log("Dropped inside the box1!");
@@ -248,10 +270,13 @@
                     count2++;
                 }
             });
+			
+			*/
             if (count1==count2 && count1==target/2.0){ 
             
             	alert('Yayy!');
-            	objects.forEach(function(object){object.input.draggable = false;});
+            	boxGroupL.forEach(function(object){object.input.draggable = false;});
+				boxGroupR.forEach(function(object){object.input.draggable = false;});
              	return true;
              }
             else return false;
@@ -261,10 +286,25 @@
         	for (var i =0; i< target; i++){
         		
         		boxArrayX[i] = box.x+100*sx+(i%3)*150*sx;
-        		boxArrayY[i] = box.y+ 175 *sy + Math.floor(i/3)*150*sy;
+        		boxArrayY[i] = box.y+ 70 *sy + Math.floor(i/3)*100*sy;
         	}
         }
         
+		
+		function render(){
+		
+		//game.debug.bodyinfo(rocks,32,32);
+		game.debug.spriteBounds(objects);
+		game.debug.spriteBounds(boxGroupL);
+		game.debug.spriteBounds(boxGroupR);
+    	//game.debug.spriteCorners(box, true, true);
+		//game.debug.inputInfo(32, 32);
+    	//game.debug.spriteCoords(rocks, 32, 128);
+    	//game.debug.pointer( game.input.activePointer );
+		//game.debug.spriteInputInfo(controlPanel, 32, 130);
+		
+        
+        }
         
 
         function reset(){

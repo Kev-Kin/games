@@ -26,8 +26,8 @@
     window.onload = function() {
         var gameWidth = 1920;
         var gameHeight = 1080;
-        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create});
-        var objects = new Array();
+        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create, render: render});
+        //var objects = new Array();
 		var onPanel;
 		var onBattery;
         var box, battery;
@@ -131,7 +131,7 @@
 */
 			onPanel=game.add.group();
 			onBattery=game.add.group();
-			
+/*			
 			for (var i=0;i<OBJECT_AMOUNT;i++){
                 objectname = "object" + game.rnd.integerInRange(1,5);
 				panelCoordX[i] = controlPanel.x+220*sx+(i%COLUMNS_PANEL)*150*sx;
@@ -159,6 +159,34 @@
 				//console.log("02 onPanel.total: " + onPanel.total);
 				//console.log("02 onBattery.total: " + onBattery.total);			
 			}
+			
+*/
+
+				for (var i=0;i<OBJECT_AMOUNT;i++){
+                		objectname = "object" + game.rnd.integerInRange(1,5);
+				panelCoordX[i] = controlPanel.x+220*sx+(i%COLUMNS_PANEL)*150*sx;
+				panelCoordY[i] = controlPanel.y+130*sy+Math.floor(i/COLUMNS_PANEL)*150*sy;
+				
+				onPanel.addChild( onPanel.create(panelCoordX[i], panelCoordY[i], objectname) );
+		}
+		
+		batteryCoordinates();
+		
+		onPanel.forEach(function(object){
+		object.anchor.setTo(0.5,0.5);
+                object.frame=0;
+                object.scale.setTo(0.25*sx);
+                object.inputEnabled=true;
+                object.input.enableDrag(false,false,false,255,null,controlPanel);
+                object.events.onDragStart.add(onDragStart,this);
+                object.events.onDragStop.add(onDragStop,this);
+                object.events.onDragUpdate.add(onDragUpdate,this);
+                
+                });
+		
+		
+		
+			
 
             fontSize = 100*sx;
             target = game.rnd.integerInRange(1,10);
@@ -229,18 +257,15 @@
             sprite.frame=0;
             battery.frame = 0;
 			
-			for (var i = 0; i < OBJECT_AMOUNT; i++)
-			{				
-				if (isInside(objects[i]) && onPanel.removeChild(objects[i]))
+				if (isInside(sprite) && onPanel.removeChild(sprite))
 				{
-					onBattery.add(objects[i]);
+					onBattery.add(sprite);
 				}
-				else if (!isInside(objects[i]) && onBattery.removeChild(objects[i]))
+				else if (!isInside(sprite) && onBattery.removeChild(sprite))
 				{
-					onPanel.add(objects[i]);
+					onPanel.add(sprite);
 				}
-				console.log("onPanel.total: " + onPanel.total + " onBattery.total: " + onBattery.total);
-			}
+				console.log("onPanel.total: " + onPanel.total + " onBox.total: " + onBattery.total);
 			
 			//Reorders the objects on the Panel
 			for (var i = 0; i < onPanel.total; i++)
@@ -259,6 +284,10 @@
 
         function render(){
         
+        //game.debug.spriteBounds(objects);
+        game.debug.spriteBounds(onPanel);
+        game.debug.spriteBounds(onBattery);
+        
         }
 
         function isInside(object){
@@ -268,14 +297,20 @@
 
         function countCrystals(){
             count = 0;
-            objects.forEach(function(object){
+            onBattery.forEach(function(object){
                 if (isInside(object)){
                     console.log("Dropped inside the battery!");
                     count++;
                 }
             });
             scoreText.setText('Count: '+count);
-            if (count==target){ alert('Yayy!'); return true;}
+            if (count==target){ 
+            
+            	alert('Yayy!'); 
+            	onBattery.forEach(function(object){ object.input.draggable = false;} )
+            	onPanel.forEach(function(object){ object.input.draggable = false;} )
+            	return true;
+            }
             else return false;
         }
 

@@ -26,8 +26,8 @@
     window.onload = function() {
         var gameWidth = 1920;
         var gameHeight = 1080;
-        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create, update:update});    
-		var rocks = new Array();
+        var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, '', { preload: preload, create: create, update:update, render:render});    
+		//var rocks; //= new Array();
 		var onPanel;
 		var onBox;
         var box;
@@ -161,7 +161,8 @@
 			onBox=game.add.group();
 			
             //arr = shuffle(arr);
-            for (var i=0;i<ROCK_AMOUNT;i++){
+            
+ /*           for (var i=0;i<ROCK_AMOUNT;i++){
                 objectname = "object" + game.rnd.integerInRange(1,5);
 				panelCoordX[i] = controlPanel.x+220*sx+(i%COLUMNS_PANEL)*150*sx;
 				panelCoordY[i] = controlPanel.y+130*sy+Math.floor(i/COLUMNS_PANEL)*150*sy;				
@@ -176,9 +177,11 @@
 			console.log("01 onPanel.total: " + onPanel.total);
 			console.log("01 onBox.total: " + onBox.total);
 
+
 			boxCoordinates();
 			
 			// add the properties to the rocks
+        
             for(var i = 0; i < onPanel.total; i++)
 			{
 				rocks[i].anchor.setTo(0.5,0.5);
@@ -193,6 +196,39 @@
 				//console.log("02 onPanel.total: " + onPanel.total);
 				//console.log("02 onBox.total: " + onBox.total);			
 			}
+*/
+
+
+		
+		for (var i=0;i<ROCK_AMOUNT;i++){
+                		objectname = "object" + game.rnd.integerInRange(1,5);
+				panelCoordX[i] = controlPanel.x+220*sx+(i%COLUMNS_PANEL)*150*sx;
+				panelCoordY[i] = controlPanel.y+130*sy+Math.floor(i/COLUMNS_PANEL)*150*sy;
+				
+				onPanel.addChild( onPanel.create(panelCoordX[i], panelCoordY[i], objectname) );
+		}
+		
+		boxCoordinates();
+		
+		onPanel.forEach(function(object){
+		object.anchor.setTo(0.5,0.5);
+                object.frame=0;
+                object.scale.setTo(0.25*sx);
+                object.inputEnabled=true;
+                object.input.enableDrag(false,false,false,255,null,controlPanel);
+                object.events.onDragStart.add(onDragStart,this);
+                object.events.onDragStop.add(onDragStop,this);
+                object.events.onDragUpdate.add(onDragUpdate,this);
+                
+                });
+		
+		
+		
+				
+		
+		
+
+
 
             scoreText = game.add.text(game.width/2,0.1*game.height,'Count: 0',{fontSize:'24px',fill:'#000'});
             scoreText.x=game.width/2-scoreText.width/2;
@@ -273,18 +309,16 @@
             sprite.frame=0;
             box.frame = 0;
 			
-			for (var i = 0; i < ROCK_AMOUNT; i++)
-			{				
-				if (isInside(rocks[i]) && onPanel.removeChild(rocks[i]))
+				
+				if (isInside(sprite) && onPanel.removeChild(sprite))
 				{
-					onBox.add(rocks[i]);
+					onBox.add(sprite);
 				}
-				else if (!isInside(rocks[i]) && onBox.removeChild(rocks[i]))
+				else if (!isInside(sprite) && onBox.removeChild(sprite))
 				{
-					onPanel.add(rocks[i]);
+					onPanel.add(sprite);
 				}
 				console.log("onPanel.total: " + onPanel.total + " onBox.total: " + onBox.total);
-			}
 			
 			//Reorders the rocks on the Panel
 			for (var i = 0; i < onPanel.total; i++)
@@ -315,6 +349,10 @@
 
         function render(){
         
+        //game.debug.spriteBounds(rocks);
+        game.debug.spriteBounds(onPanel);
+        game.debug.spriteBounds(onBox);
+        
         }
 		
 		/* function reorderRocks(){
@@ -341,6 +379,7 @@
         function countRocks(){
             //count = 0;
 			count = onBox.total;
+			console.log("Count in box! : " + onBox.total);
 			
 	/* 		onBox.forEach(function(object){
             //objects.forEach(function(object){
@@ -355,7 +394,8 @@
             if (count==target)
 			{
 				alert("yay");
-				rocks.forEach(function(object){object.input.draggable = false;});
+				onPanel.forEach(function(object){object.input.draggable = false;});
+				onBox.forEach(function(object){object.input.draggable = false;});
 				return [true, ""];
 			}
 			else 
